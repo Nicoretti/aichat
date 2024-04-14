@@ -1,3 +1,27 @@
+#[macro_use]
+extern crate log;
+
+use std::io::{Read, stderr, stdin, stdout};
+use std::process;
+use std::sync::Arc;
+
+use anyhow::{bail, Result};
+use clap::Parser;
+use inquire::Text;
+use inquire::validator::Validation;
+use is_terminal::IsTerminal;
+use parking_lot::RwLock;
+
+use client::{ensure_model_capabilities, init_client, list_models};
+use config::Input;
+use render::{MarkdownRender, render_error, render_stream};
+use utils::{cl100k_base_singleton, create_abort_signal};
+
+use crate::cli::Cli;
+use crate::config::{Config, GlobalConfig};
+use crate::repl::Repl;
+use crate::utils::{CODE_BLOCK_RE, extract_block, run_command};
+
 mod cli;
 mod client;
 mod config;
@@ -5,28 +29,7 @@ mod render;
 mod repl;
 
 #[macro_use]
-extern crate log;
-#[macro_use]
 mod utils;
-
-use crate::cli::Cli;
-use crate::config::{Config, GlobalConfig};
-use crate::utils::{extract_block, run_command, CODE_BLOCK_RE};
-
-use anyhow::{bail, Result};
-use clap::Parser;
-use client::{ensure_model_capabilities, init_client, list_models};
-use config::Input;
-use inquire::validator::Validation;
-use inquire::Text;
-use is_terminal::IsTerminal;
-use parking_lot::RwLock;
-use render::{render_error, render_stream, MarkdownRender};
-use repl::Repl;
-use std::io::{stderr, stdin, stdout, Read};
-use std::process;
-use std::sync::Arc;
-use utils::{cl100k_base_singleton, create_abort_signal};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -144,7 +147,7 @@ fn start_directive(
 
 fn start_interactive(config: &GlobalConfig) -> Result<()> {
     cl100k_base_singleton();
-    let mut repl: Repl = Repl::init(config)?;
+    let mut repl: Repl = crate::repl::Repl::init(config)?;
     repl.run()
 }
 
