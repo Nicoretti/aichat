@@ -43,7 +43,7 @@ impl Command<Context> for Config {
     }
 
     fn description(&self) -> &str {
-        todo!()
+        "Show or set configuration options"
     }
 
     fn help(&self) -> &str {
